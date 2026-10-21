@@ -1,0 +1,56 @@
+# ════════════════════════════════════════════════════════════════════════════════════════
+# ONNX ENGINE - HIGH-PERFORMANCE GENERIC ARCHITECTURE MAKEVARS
+# ════════════════════════════════════════════════════════════════════════════════════════
+
+# Diretorios Base Locais e Dependencias Pre-compiladas
+LOCAL_PREFIX   ?= $(HOME)/.local
+LOCAL_INC       = $(LOCAL_PREFIX)/include
+LOCAL_LIB       = $(shell if [ -d "$(LOCAL_PREFIX)/lib64" ]; then echo "$(LOCAL_PREFIX)/lib64"; else echo "$(LOCAL_PREFIX)/lib"; fi)
+
+# Inclusao de Cabecalhos e Definicoes Globais
+PKG_CPPFLAGS += -I. \
+                -I$(LOCAL_INC) \
+                -D_GNU_SOURCE \
+                -D_REENTRANT \
+                -DNDEBUG
+
+# Flags de Compilacao C++ Otimizadas e Agnósticas de Microarquitetura
+# -march=native autodetecta a microarquitetura do host de execucao
+PKG_CXXFLAGS += $(CXX20STD) \
+                -march=native \
+                -mtune=native \
+                -fp-model=fast \
+                -fimf-use-svml=true \
+                -ffp-contract=fast \
+                -fno-math-errno \
+                -ftz \
+                -qopenmp \
+                -fno-semantic-interposition \
+                -ffunction-sections \
+                -fdata-sections \
+                -fvisibility=hidden \
+                -fvisibility-inlines-hidden \
+                -pipe
+
+# Flags de Linkagem e Resolucao de Objetos
+PKG_LIBS += $(LDFLAGS) \
+            -L$(LOCAL_LIB) \
+            -Wl,-rpath,$(LOCAL_LIB) \
+            -lonnxruntime \
+            -lprotobuf \
+            -liomp5 \
+            -lpthread \
+            -lm \
+            -ldl
+
+# Otimizacoes Estruturadas do Linker
+PKG_LDFLAGS += -Wl,--as-needed \
+               -Wl,--gc-sections \
+               -Wl,-z,now \
+               -Wl,-z,relro \
+               -Wl,-z,combreloc \
+               -Wl,-z,max-page-size=2097152 \
+               -Wl,--hash-style=gnu \
+               -Wl,--exclude-libs,ALL
+
+# END
